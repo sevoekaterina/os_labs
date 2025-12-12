@@ -1,0 +1,33 @@
+CC = gcc
+CFLAGS = -fPIC -Wall -Wextra
+LDFLAGS = -lm
+DLFLAGS = -ldl
+
+# Цели по умолчанию
+all: libfunc1.so libfunc2.so program1 program2
+
+# Сборка динамических библиотек
+libfunc1.so: func1.c libfunc.h
+	$(CC) $(CFLAGS) -shared -o $@ func1.c $(LDFLAGS)
+
+libfunc2.so: func2.c libfunc.h
+	$(CC) $(CFLAGS) -shared -o $@ func2.c $(LDFLAGS)
+
+# Программа 1: Статическая линковка с libfunc1.so
+program1: program1.c
+	$(CC) -o $@ program1.c -L. -lfunc1 -Wl,-rpath,. $(LDFLAGS)
+
+# Программа 2: Динамическая загрузка (использует dlopen)
+program2: program2.c
+	$(CC) -o $@ program2.c $(DLFLAGS) $(LDFLAGS)
+
+# Очистка
+clean:
+	rm -f *.so program1 program2
+
+# Запуск (для теста)
+run1: program1
+	./program1
+
+run2: program2
+	./program2
